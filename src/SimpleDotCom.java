@@ -1,40 +1,120 @@
-public class SimpleDotCom{
-    int[] locationCells;
-    int numOfHits = 0;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 
-    public void setLocationCells(int[] locs){
-        locationCells = locs;
+public class SimpleDotCom{
+
+    private ArrayList<String> locationCells;
+
+    public void setLocationCells(ArrayList<String> loc){
+        locationCells = loc;
     }
 
-    public String CheckYourself(String stringGuess){
-        int guess = Integer.parseInt(stringGuess);
+    public String CheckYourself(String userInput){
+        int guess = Integer.parseInt(userInput);
         String result = "miss";
 
-        for (int ceil : locationCells){
-            if (guess == ceil){
-                result = "hit";
-                numOfHits++;
-                break;
+        int index = locationCells.indexOf(userInput);
+
+        if (index >= 0) {
+            locationCells.remove(index);
+            if (locationCells.isEmpty()){
+                return "kill";
+            } else {
+                return "hit";
             }
         }
 
-        if (numOfHits == locationCells.length){
-            result = "kill";
-        }
-
-        System.out.println(result);
         return result;
     }
 }
 
-class Test{
-    public static void main(String[] args){
-        SimpleDotCom dot = new SimpleDotCom();
-        int[] locations = {1,2,3,4,5};
-        dot.setLocationCells(locations);
+//class Test{
+//    public static void main(String[] args){
+//        SimpleDotCom dot = new SimpleDotCom();
+//        int[] locations = {1,2,3,4,5};
+//        dot.setLocationCells(locations);
+//
+//        GameHelper helper = new GameHelper();
+//        String userGuess;
+//        userGuess = helper.getUserInput("enter a number");
+//        dot.CheckYourself(userGuess);
+//    }
+//}
 
-        String userGuess = "2";
-        dot.CheckYourself(userGuess);
+class GameHelper{
+    private static final String alphabet = "abcdefg";
+    private int gridLength = 7;
+    private int gridSize = 49;
+    private int [] grid = new int[gridSize];
+    private int comCount = 0;
+
+    public String getUserInput(String prompt){
+        String inputLine = null;
+        System.out.println(prompt + "");
+
+        try{
+            BufferedReader is = new BufferedReader(
+                    new InputStreamReader(System.in)
+            );
+            inputLine = is.readLine();
+            if (inputLine.length() == 0) return null;
+        }catch (IOException e){
+            System.out.println("IOException: " + e);
+        }
+
+        return inputLine;
     }
 
+    public ArrayList<String> placeDotCom(int comSize){
+        ArrayList<String> alphaCells = new ArrayList<String>();
+        String [] alphacoords = new String[comSize];
+        String temp = null;
+        int [] coords = new int[comSize];
+        int attempts = 0;
+        boolean success = false;
+        int location = 0;
+
+        comCount++;
+        int incr = 1;
+        if ((comCount % 2) == 1){
+            incr = gridLength;
+        }
+
+        while (!success & attempts++ < 200){
+            location = (int) (Math.random() * gridSize);
+            int x = 0;
+
+            success = true;
+            while (success && x < comSize){
+                if (grid[location] == 0){
+                    coords[x++] = location;
+                    location += incr;
+                    if (location >= gridSize){
+                        success = false;
+                    }
+
+                    if (x > 0 && (location % gridLength == 0)){
+                        success = false;
+                    } else {
+                        success = false;
+                    }
+                }
+            }
+
+            int row = 0;
+            int column = 0;
+
+            while (x < comSize){
+                grid[coords[x]] = 1;
+                row = (int) (coords[x] / gridLength);
+                column = coords[x] % gridLength;
+                temp = String.valueOf(alphabet.charAt(column));
+                alphaCells.add(temp.concat(Integer.toString(row)));
+                x++;
+            }
+        }
+        return alphaCells;
+    }
 }
